@@ -86,10 +86,6 @@ def get_due_date(img_path):
     most_common_date = date_counts.most_common(1)[0][0]
     return most_common_date
 
-#def test():
-#    for i, path in enumerate(img_list):
-#        print(f'dates from img{i+1}: {get_due_date(path)}')
-
 def extract_value(text):
     # Define a regular expression pattern to match numeric values with commas as decimal separators
     pattern = r'\b\d{1,3}(,\d{3})*(\.\d+)?\b'
@@ -102,7 +98,12 @@ def extract_value(text):
     return values
 
 
-test()
+
+
+
+#def test():
+#    for i, path in enumerate(img_list):
+#        print(f'dates from img{i+1}: {get_due_date(path)}')
 
 #for i in range(20):
 #    alpha_i = 0.0 + (i/10)
