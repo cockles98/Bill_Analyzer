@@ -22,6 +22,7 @@ img_list = [img_path1, img_path2, img_path3, img_path4, img_path5, img_path6,
 def preprocessing(img_path, alpha=1.0, beta=0.0):
     #set gray scale and ajust constrast/bright
     img = cv2.imread(img_path)
+    img = img[:,:]
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     contrasted_img = cv2.convertScaleAbs(gray_img, alpha=alpha, beta=beta)
     return contrasted_img
@@ -86,25 +87,66 @@ def get_due_date(img_path):
     most_common_date = date_counts.most_common(1)[0][0]
     return most_common_date
 
-def extract_value(text):
+
+
+
+
+
+
+
+
+
+
+
+
+def get_values(text):
+    #print(text)
     # Define a regular expression pattern to match numeric values with commas as decimal separators
-    pattern = r'\b\d{1,3}(,\d{3})*(\.\d+)?\b'
-
+    small_num_pattern = r'\b(?<!\.)\d{1,3},\d{2}\b'
+    big_num_pattern = r'\b(?<!\.)\d{1,3}.\d{1,3},\d{2}\b'
+    
     # Use re.findall to find all matches in the text
-    matches = re.findall(pattern, text)
+    small_matches = re.findall(small_num_pattern, text)
+    big_matches = re.findall(big_num_pattern, text)
+    total_matches = small_matches + big_matches
+    #print(total_matches)
+    return total_matches
 
-    # Convert the matched strings to floats, handling commas and empty strings
-    values = [float(match.replace(',', '')) if match else 0.0 for match in matches]
-    return values
+def get_payment_value(img_path):
+    final_list = []
+    for alpha, beta in [(1.3,1.0),(1.0,1.5),(1.3,1.9),(0.1,0.5)]:
+        img = preprocessing(img_path, alpha=alpha, beta=beta)
+        text = get_text(img)
+        values = get_values(text)
+        final_list += values
+    print(final_list)
+    date_counts = Counter(final_list)
+    most_common_date = date_counts.most_common(1)[0][0]
+    print(date_counts[most_common_date])
+    print(date_counts[final_list[0]])
+    if most_common_date == final_list[0]:
+        return most_common_date
+    elif date_counts[most_common_date] > 2*date_counts[final_list[0]]:
+        return most_common_date
+    else:
+        return final_list[0]
+
+#print(get_payment_value(img_path1))
+
+#img = preprocessing(img_path1, alpha=1.3, beta=1.9)
+#text = get_text(img)
+#text
+#values = get_values(text)
+#values
 
 
 
+def test():
+    for i, path in enumerate(img_list):
+        print(f'payment value from img{i+1}: {get_payment_value(path)}')
+        
 
-
-#def test():
-#    for i, path in enumerate(img_list):
-#        print(f'dates from img{i+1}: {get_due_date(path)}')
-
+test()
 #for i in range(20):
 #    alpha_i = 0.0 + (i/10)
 #    for j in range(20):
