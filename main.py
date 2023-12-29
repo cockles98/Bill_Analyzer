@@ -74,18 +74,6 @@ def get_dates(text):
     
     return coherent_date_matches   
 
-def extract_value(text):
-    # Define a regular expression pattern to match numeric values with commas as decimal separators
-    pattern = r'\b\d{1,3}(,\d{3})*(\.\d+)?\b'
-
-    # Use re.findall to find all matches in the text
-    matches = re.findall(pattern, text)
-
-    # Convert the matched strings to floats, handling commas and empty strings
-    values = [float(match.replace(',', '')) if match else 0.0 for match in matches]
-
-    return values
-
 def get_due_date(img_path):
     final_list = []
     for alpha, beta in [(1.3,1.0),(1.0,1.5),(1.3,1.9),(0.1,0.5)]:
@@ -98,9 +86,21 @@ def get_due_date(img_path):
     most_common_date = date_counts.most_common(1)[0][0]
     return most_common_date
 
-def test():
-    for i, path in enumerate(img_list):
-        print(f'dates from img{i+1}: {get_due_date(path)}')
+#def test():
+#    for i, path in enumerate(img_list):
+#        print(f'dates from img{i+1}: {get_due_date(path)}')
+
+def extract_value(text):
+    # Define a regular expression pattern to match numeric values with commas as decimal separators
+    pattern = r'\b\d{1,3}(,\d{3})*(\.\d+)?\b'
+
+    # Use re.findall to find all matches in the text
+    matches = re.findall(pattern, text)
+
+    # Convert the matched strings to floats, handling commas and empty strings
+    values = [float(match.replace(',', '')) if match else 0.0 for match in matches]
+    return values
+
 
 test()
 
