@@ -22,6 +22,7 @@ img_list = [img_path1, img_path2, img_path3, img_path4, img_path5, img_path6,
 def preprocessing(img_path, alpha=1.0, beta=0.0):
     #set gray scale and ajust constrast/bright
     img = cv2.imread(img_path)
+    #size = len(img)
     img = img[:,:]
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     contrasted_img = cv2.convertScaleAbs(gray_img, alpha=alpha, beta=beta)
@@ -36,7 +37,7 @@ def get_dates(text):
     num_seq_pattern = r'\b\d{6,10}\b'
     date_pattern = r'\b\d{2}/\d{2}/\d{4}\b'  
 
-    # Use re.findall to find all matches in the text
+    # Find all matches in the text
     num_seq_matches = re.findall(num_seq_pattern, text)
     date_matches = re.findall(date_pattern, text)
     
@@ -88,29 +89,23 @@ def get_due_date(img_path):
     return most_common_date
 
 
-
-
-
-
-
-
-
-
-
-
+############################# testing
 
 def get_values(text):
-    #print(text)
-    # Define a regular expression pattern to match numeric values with commas as decimal separators
+    # Define regular expressions patterns to match
     small_num_pattern = r'\b(?<!\.)\d{1,3},\d{2}\b'
     big_num_pattern = r'\b(?<!\.)\d{1,3}.\d{1,3},\d{2}\b'
     
-    # Use re.findall to find all matches in the text
+    # Find all matches in the text
     small_matches = re.findall(small_num_pattern, text)
     big_matches = re.findall(big_num_pattern, text)
     total_matches = small_matches + big_matches
-    #print(total_matches)
-    return total_matches
+    
+    # Format to float
+    formated_matches1 = [re.sub(r'\.', '', match) for match in total_matches]
+    formated_matches2 = [re.sub(r'\,', '.', match) for match in formated_matches1]
+    float_values = [float(match) for match in formated_matches2]
+    return float_values
 
 def get_payment_value(img_path):
     final_list = []
@@ -120,46 +115,55 @@ def get_payment_value(img_path):
         values = get_values(text)
         final_list += values
     print(final_list)
-    date_counts = Counter(final_list)
-    most_common_date = date_counts.most_common(1)[0][0]
-    print(date_counts[most_common_date])
-    print(date_counts[final_list[0]])
-    if most_common_date == final_list[0]:
+    value_counts = Counter(final_list)
+    most_common_date = value_counts.most_common(1)[0][0]
+    print(value_counts[most_common_date], most_common_date)
+    print(value_counts[final_list[0]], final_list[0])
+    print(value_counts[max(final_list)], max(final_list))
+    if most_common_date == final_list[0] == max(final_list):
         return most_common_date
-    elif date_counts[most_common_date] > 2*date_counts[final_list[0]]:
+    elif value_counts[most_common_date] > 2*value_counts[final_list[0]] and value_counts[most_common_date] > 2*value_counts[max(final_list)]:
         return most_common_date
     else:
         return final_list[0]
-
-#print(get_payment_value(img_path1))
-
-#img = preprocessing(img_path1, alpha=1.3, beta=1.9)
-#text = get_text(img)
-#text
-#values = get_values(text)
-#values
-
-
-
+    
 def test():
     for i, path in enumerate(img_list):
         print(f'payment value from img{i+1}: {get_payment_value(path)}')
         
+############################# testing
 
-test()
-#for i in range(20):
-#    alpha_i = 0.0 + (i/10)
-#    for j in range(20):
-#        beta_j = 0.0 + (j/10)
-#        img = preprocessing(img_path1, alpha=alpha_i, beta=beta_j)
-#       img_text = get_text(img)
-#        dates = get_dates(img_text)
-#        size = len(dates)
-#        if size > 0:
-#            print(f'size:{size} -- dates:{dates} -- parameters:{alpha_i, beta_j}')'''
+def get_bill_code(img_path):
+    final_list = []
+    pattern = r'\b\d{30,58}\b'
+    for alpha, beta in [(1.0,0.0),(1.3,1.0),(1.0,1.5),(1.3,1.9),(0.1,0.5)]:
+        img = preprocessing(img_path, alpha=alpha, beta=beta)
+        text = get_text(img)
+        formated_text1 = re.sub(r'\.', '', text)
+        formated_text2 = re.sub(r'\ ', '', formated_text1)
+        numbers_only = re.sub(r'\D', ' ', formated_text2)
+        print(numbers_only)
+        try:
+            code = re.findall(pattern, numbers_only)
+            final_list += code
+        except:
+            continue
+    return final_list
 
+def test_code():
+    for i, path in enumerate(img_list):
+        text = get_text(path)
+        try:
+            code = get_bill_code(text)
+            print(f'bill code from img{i+1}: {code}')
+        except:
+            continue
 
+img = preprocessing(img_path2, alpha=1.9, beta=-0.3)
+text = get_text(img)
+text
 
+#get_bill_code(img_path2)
 
 
 
